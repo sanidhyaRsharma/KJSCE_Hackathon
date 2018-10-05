@@ -54,7 +54,7 @@ def check_loc_in_poly(coords, ward_name):
 
     return WARD_POLYGONS[ward_name]['points'].contains(Point(coords[0], coords[1]))
 
-def get_ward_name(lat, lng):
+def get_location_ward(lat, lng):
     lat = float(request.args.get('lat'))
     lng = float(request.args.get('lng'))
 
@@ -123,15 +123,30 @@ def get_ward_suggestions():
     
     return json.dumps(wards, indent=4, sort_keys=True, default=str)
 
-@app.route('/api/loc', methods=['GET'])
+@app.route('/api/ward', methods=['GET'])
 def send_ward_name():
 
+    ward_name = ''
+    filter = request.args.get('filter')
+
+    if filter == 'name':
+        ward_name = request.args.get('val')
+
+    elif filter == 'loc':
         lat = float(request.args.get('lat'))
         lng = float(request.args.get('lng'))
 
-        return json.dumps({'ward' : get_ward_name(lat, lng)})
-        print(e)
-        return json.dumps({'ward':'Error'})
+        ward_name = get_location_ward((lat, lng))
+        ward_name = reformat_ward_name(ward)
+
+    ward_query = "SELECT ward_name AS w_name, ward_region AS w_regn FROM ward WHERE ward_name = '%s'" % (ward_name)
+    CURSOR.execute(ward_query)
+    DB.commit()
+    
+    ward_details = CURSOR.fetchone()
+
+
+    return json.dumps(ward_details)
 
 @app.route('/api/uploads/<filename>')
 def return_files_tut():
