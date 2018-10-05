@@ -13,3 +13,5 @@ def login():
 @app.route('/index')
 def index():
 	return render_template("index.html", title='Home')
+
+from app import restful_routes
