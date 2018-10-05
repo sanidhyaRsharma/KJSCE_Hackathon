@@ -142,15 +142,20 @@ def send_ward_name():
     ward_query = "SELECT ward_name AS w_name, ward_region AS w_regn FROM ward WHERE ward_name = '%s'" % (ward_name)
     CURSOR.execute(ward_query)
     DB.commit()
-    
+
     ward_details = CURSOR.fetchone()
 
 
     return json.dumps(ward_details)
 
-@app.route('/api/uploads/<filename>')
-def return_files_tut():
+@app.route('/api/img/uploads/get/<filename>')
+def return_files_tut(filename):
     try:
         return send_file(app.config['UPLOAD_FOLDER'] + filename)
     except Exception as e:
-        return str(e)
+        return 'Invalid Image'
+
+@app.route('/api/img/upload/', methods=['POST'])
+def upload_image():
+    request.form['file']
+    

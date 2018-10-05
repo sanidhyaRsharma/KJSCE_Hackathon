@@ -4,17 +4,39 @@ from flask import render_template
 from app.db_connect import DB, CURSOR
 @app.route('/')
 def login():
-	CURSOR.execute('SELECT * FROM user WHERE user_id = 1')
-
-	result = CURSOR.fetchone()
-
 	return render_template("page-login.html", title='Login')
 
-@app.route('/index')
-def index():
-	return render_template("index.html", title='Home')
+#TEMPLATING ROUTES
+################################
+@app.route('/dashboard_temp')
+def dashboard():
+	return render_template("dashboard.html", title='Home')
 
-from app import restful_routes
+@app.route('/charts')
+def charts():
+	return render_template("charts.html", title='Home')
+
+@app.route('/elements')
+def elements():
+	return render_template("elements.html", title='Home')
+
+@app.route('/icons')
+def icons():
+	return render_template("icons.html", title='Home')
+
+@app.route('/notifications')
+def notifications():
+	return render_template("notifications.html", title='Home')
+
+@app.route('/panels')
+def panels():
+	return render_template("panels.html", title='Home')
+
+@app.route('/tables')
+def tables():
+	return render_template("tables.html", title='Home')
+
+###################################
 
 @app.route('/coords_input')
 def simple_coords_check_form():
@@ -25,3 +47,6 @@ def simple_coords_check_form():
 		<input type="submit" name="submit" value="submit"/>
 	</form> 
 	'''
+
+from app import restful_routes
+

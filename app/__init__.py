@@ -4,7 +4,7 @@ import json
 
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/uploads/'
+UPLOAD_FOLDER = 'static/uploads/'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 mumbai_wards_polygons = ''
