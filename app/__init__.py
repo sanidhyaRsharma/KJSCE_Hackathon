@@ -1,5 +1,9 @@
 from flask import Flask
-app=Flask(__name__)
-app.config['SECRET_KEY']='This_is_a_key'	
+from app.config import Config
 
+
+app=Flask(__name__)
+app.config['SECRET_KEY']=Config.SECRET_KEY
+
+from app import db_connect
 from app import routes
