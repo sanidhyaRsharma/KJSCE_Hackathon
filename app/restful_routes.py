@@ -133,9 +133,9 @@ def send_ward_name():
         print(e)
         return json.dumps({'ward':'Error'})
 
-@app.route('/api/uploads/')
+@app.route('/api/uploads/<filename>')
 def return_files_tut():
     try:
-        return send_file('/var/www/PythonProgramming/PythonProgramming/static/images/python.jpg', attachment_filename='python.jpg')
+        return send_file(app.config['UPLOAD_FOLDER'] + filename)
     except Exception as e:
         return str(e)
