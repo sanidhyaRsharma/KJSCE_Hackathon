@@ -1,6 +1,7 @@
 from app import app
 from app.db_connect import DB, CURSOR
 import json
+from app import mumbai_wards_polygons
 
 @app.route('/get_cards', methods=['GET','POST'])
 def get_cards():
