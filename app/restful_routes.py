@@ -2,7 +2,7 @@ from app import app
 from app.db_connect import DB, CURSOR
 import json
 from math import sqrt
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 from app import mumbai_wards_polygons
 import numpy as np
 from flask import request
@@ -13,7 +13,7 @@ WARD_NAMES = [x['properties']['name'] \
 WARD_POLYGONS = {x : {} for x in WARD_NAMES}
 
 for x in mumbai_wards_polygons['features']:
-    flattened_points = [ (y[0],y[1]) for y in x['geometry']['coordinates'][0][0]]
+    flattened_points = [ (y[1],y[0]) for y in x['geometry']['coordinates'][0][0]]
     ward_name = x['properties']['name']
 
     WARD_POLYGONS[ward_name]['points']   = Polygon(flattened_points)
@@ -29,6 +29,25 @@ def format_ward_name(ward_name):
 
     return ward_name
 
+def reformat_ward_name(ward_name):
+    n_ward = ward_name[0]
+
+    if len(ward_name) > 1:
+        direc = ward_name[-1]
+
+        if direc == 'E':
+            n_ward += 'East'
+        elif direc == 'W':
+            n_ward += 'West'
+        elif direc == 'N':
+            n_ward += 'North'
+        elif direc == 'S':
+            n_ward += 'South'
+        elif direc == 'C':
+            n_ward += 'Central'
+    
+    return n_ward
+
 def check_loc_in_poly(coords, ward_name):
     if ward_name not in WARD_NAMES:
         ward_name = format_ward_name(ward_name)
@@ -41,7 +60,7 @@ def get_ward_name(lat, lng):
 
     ward_list = [z for z in WARD_NAMES]
 
-    ward_list.sort(key=lambda w_name : sqrt( (lat - WARD_POLYGONS['centroid'][0])**2 + (lng - WARD_POLYGONS['centroid'][1])**2 ))
+    ward_list.sort(key=lambda w_name : sqrt( (lat - WARD_POLYGONS[w_name]['centroid'][0])**2 + (lng - WARD_POLYGONS[w_name]['centroid'][1])**2 ))
 
     ward_list = ward_list[:5]
 
@@ -111,10 +130,10 @@ def get_ward_suggestions():
 
 @app.route('/get_ward_name', methods=['GET'])
 def send_ward_name():
-    if 'lat' not in request.args or 'lng' not in request.args.get:
-        return 'Error'
 
-    lat = float(request.args.get('lat'))
-    lng = float(request.args.get('lng'))
+        lat = float(request.args.get('lat'))
+        lng = float(request.args.get('lng'))
 
-    return json.dumps({'ward' : get_ward_name(lat, lng)})
+        return json.dumps({'ward' : get_ward_name(lat, lng)})
+        print(e)
+        return json.dumps({'ward':'Error'})
