@@ -10,4 +10,7 @@ def get_cards():
                         GROUP BY card.card_id"
     CURSOR.execute(get_cards_query)
     result = CURSOR.fetchone()
+
+    if result is None:
+        result = []
     return json.dumps(result, indent=4, sort_keys=True, default=str)
