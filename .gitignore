@@ -1,3 +1,5 @@
 venv/
 README.txt
 *.pyc
+app/__pycache__/
+app/__pycahce__/*.pyc
