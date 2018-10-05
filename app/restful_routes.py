@@ -5,7 +5,7 @@ from math import sqrt
 from shapely.geometry import Polygon, Point
 from app import mumbai_wards_polygons
 import numpy as np
-from flask import request
+from flask import request, send_file
 
 WARD_NAMES = [x['properties']['name'] \
                 for x in mumbai_wards_polygons['features']]
@@ -71,7 +71,7 @@ def get_ward_name(lat, lng):
     return 'Error'
 
 
-@app.route('/get_cards', methods=['GET','POST'])
+@app.route('/api/cards', methods=['GET','POST'])
 def get_cards():
     get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
                         COUNT(upvote.card_id) AS upvotes, COUNT(comment.comment_id) AS comment_count FROM card \
@@ -89,15 +89,10 @@ def get_cards():
         result = []
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-@app.route('/get_card_details', methods=['GET'])
-def get_card_details():
-
-    card_id = request.args.get('card_id')
-
-    if card_id is None or len(card_id) == '':
-        return json.dumps([])
+@app.route('/api/cards/<int:card_id>', methods=['GET'])
+def get_card_details(card_id):
     
-    get_comments_query = "SELECT description AS text, timestamp FROM comment WHERE card_id=%s" % (card_id)
+    get_comments_query = "SELECT description AS text, timestamp FROM comment WHERE card_id=%d" % (card_id)
     CURSOR.execute(get_comments_query)
 
     comments = CURSOR.fetchall()
@@ -120,7 +115,7 @@ def get_card_details():
     return json.dumps(additional_details, indent=4, sort_keys=True, default=str)
 
 
-@app.route('/get_ward_suggestions')
+@app.route('/api/wards')
 def get_ward_suggestions():
     wards_query = 'SELECT ward_name AS w_name, ward_region AS w_regn FROM ward'
     CURSOR.execute(wards_query)
@@ -128,7 +123,7 @@ def get_ward_suggestions():
     
     return json.dumps(wards, indent=4, sort_keys=True, default=str)
 
-@app.route('/get_ward_name', methods=['GET'])
+@app.route('/api/loc', methods=['GET'])
 def send_ward_name():
 
         lat = float(request.args.get('lat'))
@@ -137,3 +132,10 @@ def send_ward_name():
         return json.dumps({'ward' : get_ward_name(lat, lng)})
         print(e)
         return json.dumps({'ward':'Error'})
+
+@app.route('/api/uploads/')
+def return_files_tut():
+    try:
+        return send_file('/var/www/PythonProgramming/PythonProgramming/static/images/python.jpg', attachment_filename='python.jpg')
+    except Exception as e:
+        return str(e)
