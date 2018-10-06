@@ -7,7 +7,7 @@ from app.db_connect import DB, CURSOR
 def login_required(f):
 	@wraps(f)
 	def decorated_function(*args, **kwargs):
-		if g.user is None:
+		if 'admin_id' not in session:
 			flash('Login to access the admin pages')
 			return redirect(url_for('login_page', next=request.url))
 		return f(*args, **kwargs)
@@ -20,8 +20,9 @@ from app import restful_routes
 def login_page():
 	return render_template("page-login.html", title='Login')
 
-@login_required
+
 @app.route('/dashboard')
+@login_required
 def dashboard():
 	return render_template("dashboard.html", title='Home')
 
@@ -69,16 +70,20 @@ def login():
 	admin_id = request.form['admin_id']
 	password = request.form['password']
 
-	check_admin_validity = "SELECT admin_id FROM admin WHERE admin_id = '%s' AND password = SHA('%s')" % (admin_id, password)
+	check_admin_validity = "SELECT admin_id, ward FROM admin WHERE admin_id = '%s' AND password = SHA('%s')" % (admin_id, password)
 
 	CURSOR.execute(check_admin_validity)
 
 	if CURSOR.rowcount == 0:
 		flash('Invalid Login')
-		return redirect(url_for('login_page'), code = 401)
+		DB.commit()
+		return redirect(url_for('login_page'))
 	else:
-		flash('Success')
-		return redirect(url_for('login_page'), code = 401)
+		session['admin_id'] = admin_id
+		session['ward']     = CURSOR.fetchone()['ward']
+
+		DB.commit()
+		return redirect(url_for('dashboard'))
 	
 
 @app.route('/coords_input')
