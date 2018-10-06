@@ -18,13 +18,19 @@ from app import restful_routes
 
 @app.route('/')
 def login_page():
-	return render_template("page-login.html", title='Login')
+	return render_template("page-login.html", title='Login M-XPRESS')
 
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-	return render_template("dashboard.html", title='Home')
+	return render_template("dashboard.html", title='Dashboard')
+
+
+@app.route('/issues')
+@login_required
+def issues_page():
+	return render_template("cards.html", title='Issues')
 
 #TEMPLATING ROUTES
 ################################
