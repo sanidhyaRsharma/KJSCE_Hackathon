@@ -24,7 +24,48 @@ def login_page():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-	return render_template("dashboard.html", title='Dashboard')
+
+	data = {}
+	
+	total_issues_query = "SELECT COUNT(card_id) AS card_id_c FROM card"
+	CURSOR.execute(total_issues_query)
+	data['total_issues'] = CURSOR.fetchone()['card_id_c']
+	if data['total_issues'] is None:
+		data['total_issues'] = 0
+	DB.commit()
+	urgent_issues_query = "SELECT COUNT(card_id) AS card_id_c FROM card"
+	CURSOR.execute(urgent_issues_query)
+	data['urgent_issues'] = CURSOR.fetchone()['card_id_c']
+	if data['urgent_issues'] is None:
+		data['urgent_issues'] = 0
+	DB.commit()
+
+	total_comment_query = "SELECT COUNT(comment_id)  AS comm_id_c FROM comment"
+	CURSOR.execute(total_comment_query)
+
+	data['activity'] = CURSOR.fetchone()['comm_id_c']
+	if data['activity'] is None:
+		data['activity'] = 0
+	data['activity'] = data['total_issues'] + data['activity']
+	DB.commit()
+
+	recent_issues_query = "SELECT card_id, category, timestamp, status FROM card ORDER BY timestamp DESC"
+	CURSOR.execute(recent_issues_query)
+	data['recent'] = CURSOR.fetchall()
+	DB.commit()
+
+	if data['recent'] is None:
+		data['recent'] = []
+
+	markers_query = "SELECT lat,lng FROM card"
+	CURSOR.execute(markers_query)
+	data['markers'] = CURSOR.fetchall()
+
+	if data['markers'] is None:
+		data['markers'] = []
+	DB.commit()
+
+	return render_template("dashboard.html", title='Dashboard', data=data)
 
 
 @app.route('/issues')

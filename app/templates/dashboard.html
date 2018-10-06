@@ -11,8 +11,7 @@
 	 </style>
 <div class="panel panel-headline">
 	<div class="panel-heading">
-		<h3 class="panel-title">Monthly Overview</h3>
-		<p class="panel-subtitle">Period: Nov 6, 2018 - Oct 6, 2018</p>
+		<h3 class="panel-title">Statistical Overview</h3>
 	</div>
 	<div class="panel-body">
 		<div class="row">
@@ -20,7 +19,7 @@
 				<div class="metric">
 					<span class="icon"><i class="fa fa-info-circle" style="font-size:130%; margin-top: 0.5em;"></i></span>
 					<p>
-						<span class="number">1,252</span>
+						<span class="number">{{ data['total_issues'] }}</span>
 						<span class="title">Total Issues</span>
 					</p>
 				</div>
@@ -29,7 +28,7 @@
 				<div class="metric">
 					<span class="icon"><i class="fa fa-clock-o" style="font-size:130%; margin-top: 0.5em;"></i></span>
 					<p>
-						<span class="number">203</span>
+						<span class="number">{{ data['urgent_issues'] }}</span>
 						<span class="title">Urgent Issues</span>
 					</p>
 				</div>
@@ -38,7 +37,7 @@
 				<div class="metric">
 					<span class="icon"><i class="fa fa-eye"></i></span>
 					<p>
-						<span class="number">274,678</span>
+						<span class="number">{{ data['activity'] }}</span>
 						<span class="title">Visits/User Activities</span>
 					</p>
 				</div>
@@ -69,54 +68,26 @@
 								<tr>
 									<th>Issue Num.</th>
 									<th>Category</th>
-									<th>Amount</th>
 									<th>Date &amp; Time</th>
 									<th>Status</th>
 								</tr>
 							</thead>
 							<tbody>
+								{% for x in data['recent'] %}
 								<tr>
-									<td><a href="#">763648</a></td>
-									<td>Steve</td>
-									<td>$122</td>
-									<td>Oct 21, 2016</td>
-									<td><span class="label label-success">COMPLETED</span></td>
+									<td><a href="#">{{ x['card_id'] }}</a></td>
+									<td>{{x['category']}}</td>
+									<td>{{x['timestamp']}}</td>
+									<td><span class="label label-default">{{x['status']}}</span></td>
 								</tr>
-								<tr>
-									<td><a href="#">763649</a></td>
-									<td>Amber</td>
-									<td>$62</td>
-									<td>Oct 21, 2016</td>
-									<td><span class="label label-warning">PENDING</span></td>
-								</tr>
-								<tr>
-									<td><a href="#">763650</a></td>
-									<td>Michael</td>
-									<td>$34</td>
-									<td>Oct 18, 2016</td>
-									<td><span class="label label-danger">FAILED</span></td>
-								</tr>
-								<tr>
-									<td><a href="#">763651</a></td>
-									<td>Roger</td>
-									<td>$186</td>
-									<td>Oct 17, 2016</td>
-									<td><span class="label label-success">SUCCESS</span></td>
-								</tr>
-								<tr>
-									<td><a href="#">763652</a></td>
-									<td>Smith</td>
-									<td>$362</td>
-									<td>Oct 16, 2016</td>
-									<td><span class="label label-success">SUCCESS</span></td>
-								</tr>
+								{% endfor %}
 							</tbody>
 						</table>
 					</div>
 					<div class="panel-footer">
 						<div class="row">
 							<div class="col-md-6"><span class="panel-note"><i class="fa fa-clock-o"></i> Last 24 hours</span></div>
-							<div class="col-md-6 text-right"><a href="#" class="btn btn-primary">View All Issues</a></div>
+							<div class="col-md-6 text-right"><a href="issues" class="btn btn-primary">View All Issues</a></div>
 						</div>
 					</div>
 					<!-- END RECENT Cards -->
@@ -128,13 +99,14 @@
 <script>
 		// Initialize and add the map
 function initMap() {
-	// The location of Uluru
-	var uluru = {lat: 19.135879, lng: 72.886196};
-	// The map, centered at Uluru
+	// The location of mumbai
+	var mumbai = {lat: 19.135879, lng: 72.886196};
+	// The map, centered at mumbai
 	var map = new google.maps.Map(
-		document.getElementById('map'), {zoom: 10, center: uluru});
-	// The marker, positioned at Uluru
-	var marker = new google.maps.Marker({position: uluru, map: map});
+		document.getElementById('map'), {zoom: 10, center: mumbai});
+	// The marker, positioned at mumbai
+
+	var marker = new google.maps.Marker({position: mumbai, map: map});
 }
 	</script>
 	<!--Load the API from the specified URL
