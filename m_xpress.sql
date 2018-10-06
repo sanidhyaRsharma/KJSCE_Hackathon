@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.5.5-10.3.9-MariaDB)
 # Database: m_xpress
-# Generation Time: 2018-10-05 22:28:08 +0000
+# Generation Time: 2018-10-06 01:36:53 +0000
 # ************************************************************
 
 
@@ -42,8 +42,9 @@ LOCK TABLES `admin` WRITE;
 
 INSERT INTO `admin` (`admin_id`, `name`, `password`, `ward`, `position`, `contact_num`)
 VALUES
-	('aemt02.a@mcgm.gov.in','Shri Kulbhushan Vora','c1o0l0d8','Ward A','AE (Maintenance)','8898950168'),
-	('co.rs@mcgm.gov.in','Shri Surendranath Naik','c1o0l0d8','Ward R South','Complaint Officer','7738683069');
+	('admin@example.com','Admin','7110eda4d09e062aa5e4a390b0a572ac0d2c0220','Ward B','ADMIN','0000'),
+	('aemt02.a@mcgm.gov.in','Shri Kulbhushan Vora','46f8093b35f07cc029231369b52504dc53228419','Ward A','AE (Maintenance)','8898950168'),
+	('co.rs@mcgm.gov.in','Shri Surendranath Naik','46f8093b35f07cc029231369b52504dc53228419','Ward R South','Complaint Officer','7738683069');
 
 /*!40000 ALTER TABLE `admin` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -64,11 +65,12 @@ CREATE TABLE `card` (
   `image` varchar(100) DEFAULT '',
   `category` enum('ROAD','CRIME','SERVICES','MISC') NOT NULL DEFAULT 'MISC',
   `ward` varchar(10) NOT NULL DEFAULT '',
-  `user_id` int(11) NOT NULL,
+  `user_id` varchar(50) NOT NULL,
   `status` enum('PENDING','COMPLETED','IN PROGRESS') DEFAULT 'PENDING',
   PRIMARY KEY (`card_id`),
   KEY `Fk_card_ward` (`ward`),
-  CONSTRAINT `Fk_card_user` FOREIGN KEY (`card_id`) REFERENCES `user` (`user_id`),
+  KEY `Fk_card_user` (`user_id`),
+  CONSTRAINT `Fk_card_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
   CONSTRAINT `Fk_card_ward` FOREIGN KEY (`ward`) REFERENCES `ward` (`ward_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -77,8 +79,8 @@ LOCK TABLES `card` WRITE;
 
 INSERT INTO `card` (`card_id`, `timestamp`, `title`, `lat`, `lng`, `description`, `image`, `category`, `ward`, `user_id`, `status`)
 VALUES
-	(1,'2018-10-05 22:47:11','Card1',72.8403,18.9488,'This is Card 1','image','MISC','Ward A',1,'COMPLETED'),
-	(2,'2018-10-05 23:35:20','Card2',27.8403,18.9488,'This is Card 2','image','SERVICES','Ward C',2,'COMPLETED');
+	(1,'2018-10-05 22:47:11','Card1',72.8403,18.9488,'This is Card 1','image','MISC','Ward A','1','COMPLETED'),
+	(2,'2018-10-05 23:35:20','Card2',27.8403,18.9488,'This is Card 2','image','SERVICES','Ward C','2','COMPLETED');
 
 /*!40000 ALTER TABLE `card` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -92,25 +94,23 @@ DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment` (
   `comment_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `card_id` int(11) unsigned NOT NULL,
-  `user_id` int(11) unsigned NOT NULL,
+  `user_id` varchar(50) NOT NULL,
   `timestamp` datetime NOT NULL,
   `description` varchar(256) NOT NULL DEFAULT '',
-  `likes` int(11) unsigned DEFAULT NULL,
-  `dislikes` int(11) unsigned NOT NULL,
   PRIMARY KEY (`comment_id`),
   KEY `Fk_comment_card` (`card_id`),
-  KEY `Fk_comment_user` (`user_id`),
-  CONSTRAINT `Fk_comment_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`),
-  CONSTRAINT `Fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+  KEY `FK_comment_user` (`user_id`),
+  CONSTRAINT `FK_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `Fk_comment_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `comment` WRITE;
 /*!40000 ALTER TABLE `comment` DISABLE KEYS */;
 
-INSERT INTO `comment` (`comment_id`, `card_id`, `user_id`, `timestamp`, `description`, `likes`, `dislikes`)
+INSERT INTO `comment` (`comment_id`, `card_id`, `user_id`, `timestamp`, `description`)
 VALUES
-	(1,1,1,'2018-10-05 23:35:47','Oh good',NULL,0),
-	(2,1,1,'2018-10-05 23:36:07','Nice',NULL,0);
+	(1,1,'1','2018-10-05 23:35:47','Oh good'),
+	(2,1,'1','2018-10-05 23:36:07','Nice');
 
 /*!40000 ALTER TABLE `comment` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -123,11 +123,11 @@ DROP TABLE IF EXISTS `spam`;
 
 CREATE TABLE `spam` (
   `card_id` int(11) unsigned NOT NULL,
-  `user_id` int(11) unsigned NOT NULL,
+  `user_id` varchar(50) NOT NULL,
   PRIMARY KEY (`card_id`,`user_id`),
-  KEY `Fk_spam_user` (`user_id`),
-  CONSTRAINT `Fk_spam_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`),
-  CONSTRAINT `Fk_spam_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+  KEY `FK_spam_user` (`user_id`),
+  CONSTRAINT `FK_spam_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `Fk_spam_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -139,11 +139,10 @@ DROP TABLE IF EXISTS `upvote`;
 
 CREATE TABLE `upvote` (
   `card_id` int(11) unsigned NOT NULL,
-  `user_id` int(11) unsigned NOT NULL,
+  `user_id` varchar(50) NOT NULL,
   PRIMARY KEY (`card_id`,`user_id`),
   KEY `Fk_upvote_user` (`user_id`),
-  CONSTRAINT `Fk_upvote_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`),
-  CONSTRAINT `Fk_upvote_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+  CONSTRAINT `Fk_upvote_card` FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -154,15 +153,15 @@ CREATE TABLE `upvote` (
 DROP TABLE IF EXISTS `user`;
 
 CREATE TABLE `user` (
-  `user_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `username` varchar(30) NOT NULL DEFAULT '',
-  `email_id` varchar(50) NOT NULL DEFAULT '',
-  `oauth_provider` enum('GOOGLE','FACEBOOK') NOT NULL DEFAULT 'GOOGLE',
-  `oauth_id` int(11) NOT NULL,
-  `default_ward` varchar(10) NOT NULL DEFAULT '',
+  `user_id` varchar(50) NOT NULL,
+  `username` varchar(30) DEFAULT '',
+  `email_id` varchar(50) DEFAULT '',
+  `oauth_provider` enum('GOOGLE','FACEBOOK') DEFAULT 'GOOGLE',
+  `oauth_id` int(11) DEFAULT NULL,
+  `default_ward` varchar(10) DEFAULT 'Ward A',
   PRIMARY KEY (`user_id`),
-  KEY `Fk_user_ward` (`default_ward`),
-  CONSTRAINT `Fk_user_ward` FOREIGN KEY (`default_ward`) REFERENCES `ward` (`ward_name`)
+  KEY `FK_user_Ward` (`default_ward`),
+  CONSTRAINT `FK_user_Ward` FOREIGN KEY (`default_ward`) REFERENCES `ward` (`ward_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 LOCK TABLES `user` WRITE;
@@ -170,8 +169,8 @@ LOCK TABLES `user` WRITE;
 
 INSERT INTO `user` (`user_id`, `username`, `email_id`, `oauth_provider`, `oauth_id`, `default_ward`)
 VALUES
-	(1,'sagar','anon@google.com','GOOGLE',0,'Ward B'),
-	(2,'Sanidhya','anon@google.com','GOOGLE',0,'Ward C');
+	('1','sagar','anon@google.com','GOOGLE',0,'Ward B'),
+	('2','Sanidhya','anon@google.com','GOOGLE',0,'Ward C');
 
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;

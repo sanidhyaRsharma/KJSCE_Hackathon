@@ -69,7 +69,7 @@ def get_location_ward(lat, lng):
         if check_loc_in_poly((lat, lng), ward):
             return ward
     
-    return 'Error'
+    return 'A' # Default ward
 
 
 @app.route('/api/cards', methods=['GET','POST'])
@@ -188,8 +188,53 @@ def return_files_tut(filename):
     except Exception as e:
         return 'Invalid Image'
 
-@app.route('/api/img/upload/', methods=['POST'])
-def upload_image():
-    request.form['file']
-    #todo(1) Store file on server
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+@app.route('/api/card/upload', methods=['POST'])
+def upload_card():
+    pass
+    # up_file = request.form['file']
+    title   = request.form['title']
+
+    lat     = request.form['lat']
+    lng     = request.form['lng']
+    description = request.form['description']
+    # image = 
+    user_id = request.form['user_id']
+    category = request.form['category']
+
+    ward = reformat_ward_name(get_location_ward(lat,lng))
+
+    add_card_query = "INSERT INTO card (title, lat, lng, description,category,ward, user_id)\
+                    VALUES ('%s', %s, %s, '%s', '%s', '%s')" % (title, lat, lng, description, category, ward, user_id)
+    
+    CURSOR.execute(add_card_query)
+    DB.commit()
+    
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/api/comment', methods=['GET'])
+def add_comment():
+    card_id = request.args.get('card_id')
+    user_id = request.args.get('user_id')
+    comment = request.args.get('text')
+
+    add_comment_query = "INSERT INTO comment (card_id, user_id, description, timestamp) VALUES (%s, '%s', '%s', CURRENT_TIMESTAMP)" %(card_id, user_id, comment)
+    CURSOR.execute(add_comment_query)
+    DB.commit()
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/api/login', methods=['GET'])
+def user_login():
+    user_id = request.args.get('user_id')
+
+    if user_id is None:
+        return json.dumps({'success':False}), 401, {'ContentType':'application/json'}
+
+    add_user_query = "INSERT IGNORE INTO user (user_id) VALUES ('%s')" % (user_id)
+
+    CURSOR.execute(add_user_query)
+    DB.commit()
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+    
