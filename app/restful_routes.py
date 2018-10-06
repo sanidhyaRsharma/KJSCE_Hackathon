@@ -118,6 +118,37 @@ def get_cards():
 
         result.sort(key = lambda x : x['upvotes'], reverse = True)
 
+    elif filter == 'upvotes':
+        get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
+                        COUNT(upvote.card_id) AS upvotes, COUNT(comment.comment_id) AS comment_count FROM card \
+                        LEFT JOIN upvote ON card.card_id = upvote.card_id \
+                        LEFT JOIN comment ON card.card_id = comment.card_id \
+                        INNER JOIN ward ON card.ward = ward.ward_name\
+                        WHERE card.ward='%s'\
+                        GROUP BY card.card_id\
+                        ORDER BY upvotes DESC " % (ward)
+
+        CURSOR.execute(get_cards_query)
+        result = CURSOR.fetchall()
+
+        DB.commit()
+
+    elif filter == 'time':
+        get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
+                        COUNT(upvote.card_id) AS upvotes, COUNT(comment.comment_id) AS comment_count FROM card \
+                        LEFT JOIN upvote ON card.card_id = upvote.card_id \
+                        LEFT JOIN comment ON card.card_id = comment.card_id \
+                        INNER JOIN ward ON card.ward = ward.ward_name\
+                        WHERE card.ward='%s'\
+                        GROUP BY card.card_id\
+                        ORDER BY timestamp DESC " % (ward)
+
+        CURSOR.execute(get_cards_query)
+        result = CURSOR.fetchall()
+
+        DB.commit()
+
+
     if result is None:
         result = []
     return json.dumps(result, indent=4, sort_keys=True, default=str)
