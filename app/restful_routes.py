@@ -1,6 +1,7 @@
 from app import app
 from app.db_connect import DB, CURSOR
 import json
+import requests
 from math import sqrt
 from shapely.geometry import Polygon, Point
 from app import mumbai_wards_polygons
@@ -73,23 +74,55 @@ def get_location_ward(lat, lng):
 
 @app.route('/api/cards', methods=['GET','POST'])
 def get_cards():
-    get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
+
+    filter = request.args.get('filter')
+    get_cards_query = ''
+    result = ''
+
+    if filter is None:
+        get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
                         COUNT(upvote.card_id) AS upvotes, COUNT(comment.comment_id) AS comment_count FROM card \
                         LEFT JOIN upvote ON card.card_id = upvote.card_id \
                         LEFT JOIN comment ON card.card_id = comment.card_id \
                         INNER JOIN ward ON card.ward = ward.ward_name\
                         GROUP BY card.card_id"
+        CURSOR.execute(get_cards_query)
+        result = CURSOR.fetchall()
 
-    CURSOR.execute(get_cards_query)
-    result = CURSOR.fetchall()
+        DB.commit()
 
-    DB.commit()
+    elif filter == 'nearby':
+        lat = request.args.get('lat')
+        lng = request.args.get('lng')
+
+        ward = get_location_ward(lat, lng)
+        ward = reformat_ward_name(ward)
+
+        get_cards_query = "SELECT card.card_id AS card_id, card.timestamp AS timestamp, title, lat, lng, image, category, ward.ward_region AS ward, \
+                        COUNT(upvote.card_id) AS upvotes, COUNT(comment.comment_id) AS comment_count FROM card \
+                        LEFT JOIN upvote ON card.card_id = upvote.card_id \
+                        LEFT JOIN comment ON card.card_id = comment.card_id \
+                        INNER JOIN ward ON card.ward = ward.ward_name\
+                        GROUP BY card.card_id \
+                        WHERE card.ward = '%s'" % (ward)
+
+        CURSOR.execute(get_cards_query)
+        result = CURSOR.fetchall()
+
+        DB.commit()
+
+        result.sort(key = lambda x : sqrt( (lat - x['lat'])**2 + (lng - x['lng'])**2 ))
+
+        if len(result) > 25:
+            result = result[:25]
+
+        result.sort(key = lambda x : x['upvotes'], reverse = True)
 
     if result is None:
         result = []
     return json.dumps(result, indent=4, sort_keys=True, default=str)
 
-@app.route('/api/cards/<int:card_id>', methods=['GET'])
+@app.route('/api/card/<int:card_id>', methods=['GET'])
 def get_card_details(card_id):
     
     get_comments_query = "SELECT description AS text, timestamp FROM comment WHERE card_id=%d" % (card_id)
@@ -158,5 +191,5 @@ def return_files_tut(filename):
 @app.route('/api/img/upload/', methods=['POST'])
 def upload_image():
     request.form['file']
-    
+    #todo(1) Store file on server
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
