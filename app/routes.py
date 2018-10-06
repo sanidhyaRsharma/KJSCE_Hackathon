@@ -73,6 +73,13 @@ def dashboard():
 def issues_page():
 	return render_template("cards.html", title='Issues')
 
+@app.route('/logout')
+@login_required
+def logout():
+   session.pop('admin_id', None)
+   return redirect(url_for('login_page'))
+
+
 #TEMPLATING ROUTES
 ################################
 @app.route('/dashboard_temp')

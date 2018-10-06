@@ -99,21 +99,45 @@
 <script>
 		// Initialize and add the map
 function initMap() {
-	// The location of mumbai
-	var mumbai = {lat: 19.135879, lng: 72.886196};
-	// The map, centered at mumbai
+	
+	var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	
+	
+
+// The location of mumbai
+var mumbai = {lat: 19.135879, lng: 72.886196};
+
+let coords = [ 
+				{% for x in data['markers'] %}
+				{ 'lat': {{x['lat']}}, 'lng' : {{x['lng']}} },
+				{% endfor %} 
+			];
+
+	// // The map, centered at mumbai
 	var map = new google.maps.Map(
 		document.getElementById('map'), {zoom: 10, center: mumbai});
-	// The marker, positioned at mumbai
+	// // The marker, positioned at mumbai
+	
+    
+	var markers = coords.map(function(location, i) {
+		return new google.maps.Marker({
+		position: location,
+		label: labels[i % labels.length],
+		map: map
+		});
+    });
 
-	var marker = new google.maps.Marker({position: mumbai, map: map});
+	// var marker = new google.maps.Marker({position: mumbai, map: map});
 }
+	
 	</script>
 	<!--Load the API from the specified URL
 	* The async attribute allows the browser to render the page while the API loads
 	* The key parameter will contain your own API key (which is not needed for this tutorial)
 	* The callback parameter executes the initMap() function
 	-->
+	<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
 	<script async defer
 	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZShSU-ew_wZxGfZcPB8IkyLDq1FuSE0Q&callback=initMap">
 	</script>
