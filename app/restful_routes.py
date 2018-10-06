@@ -159,3 +159,4 @@ def return_files_tut(filename):
 def upload_image():
     request.form['file']
     
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 

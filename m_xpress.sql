@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.5.5-10.3.9-MariaDB)
 # Database: m_xpress
-# Generation Time: 2018-10-05 13:22:48 +0000
+# Generation Time: 2018-10-05 22:28:08 +0000
 # ************************************************************
 
 
@@ -26,15 +26,27 @@
 DROP TABLE IF EXISTS `admin`;
 
 CREATE TABLE `admin` (
-  `admin_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `admin_id` varchar(30) NOT NULL DEFAULT '',
   `name` varchar(50) DEFAULT NULL,
   `password` varchar(128) DEFAULT NULL,
-  `ward` varchar(10) NOT NULL DEFAULT '',
+  `ward` varchar(20) NOT NULL DEFAULT '',
+  `position` varchar(30) DEFAULT NULL,
+  `contact_num` varchar(15) DEFAULT '',
   PRIMARY KEY (`admin_id`),
   KEY `Fk_admin_ward` (`ward`),
   CONSTRAINT `Fk_admin_ward` FOREIGN KEY (`ward`) REFERENCES `ward` (`ward_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+LOCK TABLES `admin` WRITE;
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+
+INSERT INTO `admin` (`admin_id`, `name`, `password`, `ward`, `position`, `contact_num`)
+VALUES
+	('aemt02.a@mcgm.gov.in','Shri Kulbhushan Vora','c1o0l0d8','Ward A','AE (Maintenance)','8898950168'),
+	('co.rs@mcgm.gov.in','Shri Surendranath Naik','c1o0l0d8','Ward R South','Complaint Officer','7738683069');
+
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table card
@@ -53,12 +65,23 @@ CREATE TABLE `card` (
   `category` enum('ROAD','CRIME','SERVICES','MISC') NOT NULL DEFAULT 'MISC',
   `ward` varchar(10) NOT NULL DEFAULT '',
   `user_id` int(11) NOT NULL,
+  `status` enum('PENDING','COMPLETED','IN PROGRESS') DEFAULT 'PENDING',
   PRIMARY KEY (`card_id`),
   KEY `Fk_card_ward` (`ward`),
   CONSTRAINT `Fk_card_user` FOREIGN KEY (`card_id`) REFERENCES `user` (`user_id`),
   CONSTRAINT `Fk_card_ward` FOREIGN KEY (`ward`) REFERENCES `ward` (`ward_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+LOCK TABLES `card` WRITE;
+/*!40000 ALTER TABLE `card` DISABLE KEYS */;
+
+INSERT INTO `card` (`card_id`, `timestamp`, `title`, `lat`, `lng`, `description`, `image`, `category`, `ward`, `user_id`, `status`)
+VALUES
+	(1,'2018-10-05 22:47:11','Card1',72.8403,18.9488,'This is Card 1','image','MISC','Ward A',1,'COMPLETED'),
+	(2,'2018-10-05 23:35:20','Card2',27.8403,18.9488,'This is Card 2','image','SERVICES','Ward C',2,'COMPLETED');
+
+/*!40000 ALTER TABLE `card` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table comment
@@ -81,6 +104,16 @@ CREATE TABLE `comment` (
   CONSTRAINT `Fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+LOCK TABLES `comment` WRITE;
+/*!40000 ALTER TABLE `comment` DISABLE KEYS */;
+
+INSERT INTO `comment` (`comment_id`, `card_id`, `user_id`, `timestamp`, `description`, `likes`, `dislikes`)
+VALUES
+	(1,1,1,'2018-10-05 23:35:47','Oh good',NULL,0),
+	(2,1,1,'2018-10-05 23:36:07','Nice',NULL,0);
+
+/*!40000 ALTER TABLE `comment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table spam
@@ -137,7 +170,8 @@ LOCK TABLES `user` WRITE;
 
 INSERT INTO `user` (`user_id`, `username`, `email_id`, `oauth_provider`, `oauth_id`, `default_ward`)
 VALUES
-	(1,'sagar','anon@google.com','GOOGLE',0,'Ward B');
+	(1,'sagar','anon@google.com','GOOGLE',0,'Ward B'),
+	(2,'Sanidhya','anon@google.com','GOOGLE',0,'Ward C');
 
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -176,7 +210,7 @@ VALUES
 	('Ward K West','K/West ward Office Building, Paliram Road, Near, S.V. Road, Opp. Andheri Railway Station, Andheri(W), Mumbai-400 058.','Andheri(W)',400058),
 	('Ward L','Municipal Market Building, S.G.Barve Road, Kurla (West) , Mumbai – 400070.','Kurla (West)',400070),
 	('Ward M East','M/E Ward Office Bldg., Building Flat no.38 &amp; 39, Village Devnar, M.T. Kadam Marg, Peri Feri Road, Devnar Landmark Devnar Colony, Mumabi-400 043','Devnar Landmark Devnar Colony',400043),
-	('Ward M/ West','M/W ward Office Building, Sharadbhau Acharya Marg, Near Natraj Cinema, Chember, Mumbai-400 071.','Chember',400071),
+	('Ward M West','M/W ward Office Building, Sharadbhau Acharya Marg, Near Natraj Cinema, Chember, Mumbai-400 071.','Chember',400071),
 	('Ward N','N ward Annex Building, Jawahar Road, Ghatkopar (E), Mumbai-400 077.','Ghatkopar (E)',400077),
 	('Ward P North','P/N Ward Office Building, Liberty Garden, Mamletdarwadi Marg, Malad (West), Mumbai-400 064.','Malad (West)',400064),
 	('Ward P South','P/S Ward Office Building, Opp.City Center Shopping Mall, S.V. Road, Goregaon, Mumbai-400 064.','Goregaon',400064),

@@ -19,6 +19,11 @@
 	<!-- ICONS -->
 	<link rel="apple-touch-icon" sizes="76x76" href="{{url_for('static',filename='assets/img/apple-icon.png')}}">
 	<link rel="icon" type="image/png" sizes="96x96" href="{{url_for('static',filename='assets/img/favicon.png')}}">
+
+	<!--JQUERY MINIFIED -->
+	<script   src="https://code.jquery.com/jquery-3.3.1.min.js"   
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="  
+	crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -33,22 +38,16 @@
 								<div class="logo text-center"><h1>M-Xpress</h1></div>
 								<p class="lead">Login to your account</p>
 							</div>
-							<form class="form-auth-small" action="index.php">
+							<form class="form-auth-small" action="{{ url_for('login') }}" method = "post">
 								<div class="form-group">
 									<label for="signin-email" class="control-label sr-only">Email</label>
-									<input type="email" class="form-control" id="signin-email" placeholder="Email">
+									<input type="email" class="form-control" id="signin-email" name="admin_id" placeholder="Email">
 								</div>
 								<div class="form-group">
 									<label for="signin-password" class="control-label sr-only">Password</label>
-									<input type="password" class="form-control" id="signin-password" placeholder="Password">
+									<input type="password" class="form-control" id="signin-password" name="password" placeholder="Password">
 								</div>
-								<div class="form-group clearfix">
-									<label class="fancy-checkbox element-left">
-										<input type="checkbox">
-										<span>Remember me</span>
-									</label>
-								</div>
-								<button type="submit" class="btn btn-primary btn-lg btn-block">LOGIN</button>
+								<button type="submit" class="btn btn-primary btn-lg btn-block" style="margin:auto; max-width:400px; margin-top:1em;">LOGIN</button>
 								<div class="bottom">
 									<span class="helper-text"><i class="fa fa-lock"></i> <a href="#">Forgot password?</a></span>
 								</div>
@@ -68,6 +67,49 @@
 		</div>
 	</div>
 	<!-- END WRAPPER -->
+	<!-- Javascript -->
+	<script src="{{url_for('static',filename='assets/vendor/jquery/jquery.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/vendor/bootstrap/js/bootstrap.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/vendor/chartist/js/chartist.min.js')}}"></script>
+	<script src="{{url_for('static',filename='assets/scripts/klorofil-common.js')}}"></script>
+	<!-- Modal -->
+<div id="flashModal" class="modal fade" role="dialog">
+	<div class="modal-dialog">
+
+	<!-- Modal content-->
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal">&times;</button>
+			<h4 class="modal-title">An Error has occured</h4>
+		</div>
+		<div class="modal-body">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ol>
+					{% for message in messages %}
+						<li>{{ message }}</li>
+				  	{% endfor %}
+					</ol>
+				{% endif %}
+			{% endwith %}
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		</div>
+	</div>
+
+	</div>
+</div>
+<script type="text/javascript">
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		$('#flashModal').modal('show');
+	{% endif %}
+{% endwith %}
+</script>
 </body>
 
 </html>

@@ -1,15 +1,34 @@
 from app import app
-from flask import render_template
+from functools import wraps
+from flask import render_template, request, session, flash, redirect, url_for
 
 from app.db_connect import DB, CURSOR
+
+def login_required(f):
+	@wraps(f)
+	def decorated_function(*args, **kwargs):
+		if g.user is None:
+			flash('Login to access the admin pages')
+			return redirect(url_for('login_page', next=request.url))
+		return f(*args, **kwargs)
+	return decorated_function
+
+from app import restful_routes
+
+
 @app.route('/')
-def login():
+def login_page():
 	return render_template("page-login.html", title='Login')
+
+@login_required
+@app.route('/dashboard')
+def dashboard():
+	return render_template("dashboard.html", title='Home')
 
 #TEMPLATING ROUTES
 ################################
 @app.route('/dashboard_temp')
-def dashboard():
+def dashboard_temp():
 	return render_template("dashboard.html", title='Home')
 
 @app.route('/charts')
@@ -28,6 +47,10 @@ def icons():
 def notifications():
 	return render_template("notifications.html", title='Home')
 
+@app.route('/page-profile')
+def page_profile():
+	return render_template("page-profile.html", title='Home')
+
 @app.route('/panels')
 def panels():
 	return render_template("panels.html", title='Home')
@@ -36,7 +59,27 @@ def panels():
 def tables():
 	return render_template("tables.html", title='Home')
 
+@app.route('/typography')
+def typography():
+	return render_template("typography.html", title='Home')
 ###################################
+
+@app.route('/login', methods = ['POST'])
+def login():
+	admin_id = request.form['admin_id']
+	password = request.form['password']
+
+	check_admin_validity = "SELECT admin_id FROM admin WHERE admin_id = '%s' AND password = SHA('%s')" % (admin_id, password)
+
+	CURSOR.execute(check_admin_validity)
+
+	if CURSOR.rowcount == 0:
+		flash('Invalid Login')
+		return redirect(url_for('login_page'), code = 401)
+	else:
+		flash('Success')
+		return redirect(url_for('login_page'), code = 401)
+	
 
 @app.route('/coords_input')
 def simple_coords_check_form():
@@ -48,5 +91,4 @@ def simple_coords_check_form():
 	</form> 
 	'''
 
-from app import restful_routes
 
